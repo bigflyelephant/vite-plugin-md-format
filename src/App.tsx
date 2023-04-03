@@ -24,7 +24,7 @@ function App() {
         })
       }}>get html</button>{state.state}
       <div style={{
-        border: '1px soild black'
+        border: '1px solid black'
       }}>
         {
           JSON.stringify(state.data)
@@ -32,7 +32,7 @@ function App() {
       </div>
     
       <div style={{
-        border: '1px soild black'
+        border: '1px solid black'
       }} dangerouslySetInnerHTML={{
         __html: state.data?.default || ''
       }}>

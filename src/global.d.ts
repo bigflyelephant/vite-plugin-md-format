@@ -1,7 +1,8 @@
 declare module "*.md" {
   const mdHTMLString: string;
   const assetURLs: string[];
-  export { assetURLs };
+  const metadata: Object
+  export { assetURLs, metadata };
 
   export default mdHTMLString;
 }

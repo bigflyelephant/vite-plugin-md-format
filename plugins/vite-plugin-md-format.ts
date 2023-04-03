@@ -5,7 +5,9 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import remarkRehype from "remark-rehype";
 import rehypeStringify from "rehype-stringify";
-
+import rehypeHighlight from "rehype-highlight";
+import remarkFrontmatter from 'remark-frontmatter'
+import YAML from 'yaml'
 
 const fileRegex = /\.(md)$/;
 
@@ -24,6 +26,7 @@ const compileMDToTS = (src: string, id: string) => {
   const urlMap = new Map<string, string>();
   const pathSet = new Set<string>();
   const randomSet = new Set<string>();
+  let metadata: Object = {};
 
   const transURL = (data: any) => {
     if (!data) return;
@@ -51,10 +54,20 @@ const compileMDToTS = (src: string, id: string) => {
   const processor = unified()
     .use(remarkParse)
     .use(remarkGfm)
+    .use(remarkFrontmatter, ['yaml', 'toml'])
+    .use(() => (tree) => {
+      // @ts-ignore
+      tree.children.forEach(({type, value}) => {
+        if (type === 'yaml') {
+          metadata = YAML.parse(value)
+        }
+      })
+    })
     .use(remarkRehype, {
       allowDangerousHtml: true,
     })
     .use(rehypeRaw)
+    .use(rehypeHighlight)
     .use(() => transURL)
     //@ts-ignore
     .use(rehypeStringify);
@@ -71,8 +84,10 @@ const compileMDToTS = (src: string, id: string) => {
   });
   const result = `  ${importStrings.join("\n")}
   const assetURLs=[${randomStrings.join(",")}];
+  const metadata=${JSON.stringify(metadata)};
   export {
-      assetURLs
+      assetURLs,
+      metadata
   }
   export default \`${tsxString.replace("`", "\\`")}\`
   `;
